@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgroSustentável: O Jogo do Agrinho</title>
+    <title>AgroSustentável: O Jogo do Agrinho Pro</title>
     <style>
         :root {
             --primary: #2e7d32;
@@ -39,11 +39,12 @@
 
         .painel-box {
             background: white;
-            padding: 15px 25px;
+            padding: 12px 20px;
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             font-weight: bold;
             text-align: center;
+            min-width: 100px;
         }
 
         .status-valor {
@@ -53,11 +54,6 @@
             margin-top: 5px;
         }
 
-        #txt-era {
-            color: #0d47a1;
-            font-size: 1.3rem;
-        }
-
         #alerta-evento {
             background-color: #ffe082;
             border: 2px solid #ffb300;
@@ -65,22 +61,23 @@
             padding: 12px;
             border-radius: 8px;
             margin-bottom: 20px;
-            max-width: 440px;
+            max-width: 500px;
             text-align: center;
             font-weight: bold;
             display: none;
         }
 
         #controles {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
             justify-content: center;
+            max-width: 600px;
         }
 
         .btn-construcao {
-            padding: 10px 20px;
+            padding: 10px 15px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
@@ -88,32 +85,35 @@
             transition: 0.2s;
         }
 
-        .btn-construcao:hover {
-            transform: scale(1.05);
+        .btn-construcao:hover { transform: scale(1.05); }
+        .btn-construcao:disabled { background-color: #bdbdbd !important; color: #757575; cursor: not-allowed; transform: none; }
+
+        #btn-milho { background-color: #fff59d; color: #5d4037; }
+        #btn-soja { background-color: #c5e1a5; color: #33691e; }
+        #btn-bio { background-color: #80deea; color: #006064; }
+        #btn-reserva { background-color: #a5d6a7; color: #1b5e20; }
+        #btn-trator { background-color: #ef9a9a; color: #b71c1c; }
+
+        #acoes-globais {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
         }
 
-        #btn-lavoura { background-color: #ffd54f; color: #5d4037; }
-        #btn-reserva { background-color: #81c784; color: #1b5e20; }
-        #btn-tecnologia { background-color: #4fc3f7; color: #0d47a1; }
-
-        #btn-turno {
-            background-color: #e65100;
-            color: white;
-            font-size: 1.1rem;
+        .btn-global {
             padding: 12px 25px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             font-weight: bold;
-            margin-bottom: 20px;
+            font-size: 1rem;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        #btn-turno:hover { background-color: #f57c00; }
+        #btn-turno { background-color: #e65100; color: white; }
+        #btn-expandir { background-color: #0288d1; color: white; }
 
-        .selecionado {
-            outline: 3px solid black;
-        }
+        .selecionado { outline: 3px solid black; }
 
         #tabuleiro {
             display: grid;
@@ -137,50 +137,49 @@
             transition: background 0.3s;
         }
 
-        .celula:hover {
-            filter: brightness(1.2);
+        .bloqueado {
+            background-color: #4e342e;
+            cursor: not-allowed;
+            color: #795548;
+            font-size: 1rem;
         }
 
-        .lavoura { background-color: #fff176; }
-        .reserva { background-color: #4caf50; }
-        .tecnologia { background-color: #80deea; }
+        .celula:not(.bloqueado):hover { filter: brightness(1.2); }
+        .milho { background-color: #fff59d; }
+        .soja { background-color: #c5e1a5; }
+        .bio { background-color: #80deea; }
+        .reserva { background-color: #a5d6a7; }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>AgroSustentável: Eras do Campo</h1>
-        <p>Evolua sua tecnologia e vença os desafios do clima e das pragas!</p>
+        <h1>AgroSustentável: Simulador de Gestão</h1>
+        <p>Gerencie o espaço, mude suas culturas e expanda suas terras com equilíbrio!</p>
     </header>
 
     <section id="paineis-container">
-        <div class="painel-box">
-            <span>Era Atual</span>
-            <span id="txt-era" class="status-valor">🌾 Tradicional</span>
-        </div>
-        <div class="painel-box">
-            <span>Caixa</span>
-            <span id="txt-moedas" class="status-valor">R$ 1000</span>
-        </div>
-        <div class="painel-box">
-            <span>Produção</span>
-            <span id="txt-producao" class="status-valor">0 sc/ano</span>
-        </div>
-        <div class="painel-box">
-            <span>Sustentabilidade</span>
-            <span id="txt-sustentabilidade" class="status-valor">100%</span>
-        </div>
+        <div class="painel-box"><span>Era Atual</span><span id="txt-era" class="status-valor" style="color:#0d47a1;">🌾 Inicial</span></div>
+        <div class="painel-box"><span>Caixa</span><span id="txt-moedas" class="status-valor">R$ 1000</span></div>
+        <div class="painel-box"><span>Produção</span><span id="txt-producao" class="status-valor">0 sc</span></div>
+        <div class="painel-box"><span>Sustentabilidade</span><span id="txt-sustentabilidade" class="status-valor">100%</span></div>
+        <div class="painel-box"><span>Tamanho Mapa</span><span id="txt-tamanho" class="status-valor">3 x 3</span></div>
     </section>
 
     <div id="alerta-evento">⚠️ Evento: Nenhuma adversidade reportada.</div>
 
     <section id="controles">
-        <button id="btn-lavoura" class="btn-construcao" onclick="selecionarConstrucao('lavoura')">Plantio Convencional (-R$100)</button>
-        <button id="btn-reserva" class="btn-construcao" onclick="selecionarConstrucao('reserva')">Reserva Legal (-R$150)</button>
-        <button id="btn-tecnologia" class="btn-construcao" onclick="selecionarConstrucao('tecnologia')">Agrotech (-R$300)</button>
+        <button id="btn-milho" class="btn-construcao" onclick="selecionarConstrucao('milho')">🌽 Plantar Milho (-R$80)</button>
+        <button id="btn-soja" class="btn-construcao" onclick="selecionarConstrucao('soja')" disabled>🌱 Plantar Soja (-R$150)</button>
+        <button id="btn-bio" class="btn-construcao" onclick="selecionarConstrucao('bio')" disabled>🛸 Bioinsumos Agrotech (-R$300)</button>
+        <button id="btn-reserva" class="btn-construcao" onclick="selecionarConstrucao('reserva')">🌳 Reserva Legal (-R$100)</button>
+        <button id="btn-trator" class="btn-construcao" onclick="selecionarConstrucao('trator')">🚜 Trator / Limpar Solo (-R$30)</button>
     </section>
 
-    <button id="btn-turno" onclick="passarTurno()">🌾 COLHER & AVANÇAR ANO 🗓️</button>
+    <div id="acoes-globais">
+        <button id="btn-turno" class="btn-global" onclick="passarTurno()">🗓️ AVANÇAR ANO & COLHER</button>
+        <button id="btn-expandir" class="btn-global" onclick="expandirTerras()">🗺️ COMPRAR EXPANSÃO (-R$500)</button>
+    </div>
 
     <main id="tabuleiro"></main>
 
@@ -189,125 +188,188 @@
         let producao = 0;
         let sustentabilidade = 100;
         let construcaoSelecionada = null;
-        let eraAtual = 1; // 1: Tradicional, 2: Mecanizada, 3: Digital / Sustentável
+        let eraAtual = 1; 
+        let tamanhoMapa Ativo = 3; // Começa 3x3, expande até 5x5
 
         const dadosConstrucao = {
-            lavoura: { custo: 100, prod: 30, sust: -15, icone: '🌾' },
-            reserva: { custo: 150, prod: 0, sust: 20, icone: '🌳' },
-            tecnologia: { custo: 300, prod: 60, sust: 5, icone: '🛸' }
+            milho: { custo: 80, prod: 25, sust: -10, icone: '🌽' },
+            soja: { custo: 150, prod: 55, sust: -15, icone: '🌱' },
+            bio: { custo: 300, prod: 90, sust: 10, icone: '🛸' },
+            reserva: { custo: 100, prod: 0, sust: 20, icone: '🌳' },
+            trator: { custo: 30, prod: 0, sust: 0, icone: '' }
         };
 
-        // Lista de adversidades aleatórias
         const eventosAdversos = [
-            { nome: "🐛 Ataque de Pragas!", impactoProd: -15, impactoSust: -5, msg: "Insetos atacaram suas lavouras! A produção caiu." },
-            { nome: "☀️ Seca Prolongada!", impactoProd: -20, impactoSust: 0, msg: "Falta de chuva na região! O rendimento da colheita diminuiu." },
-            { nome: "❄️ Geada Forte!", impactoProd: -25, impactoSust: -5, msg: "O frio queimou parte das plantas. Perdas financeiras registradas." },
-            { nome: "🌱 Clima Perfeito!", impactoProd: 15, impactoSust: 5, msg: "Tempo bom! Bônus de produção e recuperação ambiental neste ano." }
+            { nome: "🐛 Ataque de Pragas!", impactoProd: -20, impactoSust: -5, msg: "Insetos atingiram a lavoura tradicional. Lavouras de tecnologia Bio sofreram menos impacto!" },
+            { nome: "☀️ Seca Severa!", impactoProd: -30, impactoSust: 0, msg: "Falta d'água reduziu a colheita geral." },
+            { nome: "🌱 Clima Ideal!", impactoProd: 20, impactoSust: 5, msg: "Condições perfeitas aumentaram o ganho da safra!" }
         ];
 
-        const tabuleiro = document.getElementById('tabuleiro');
+        // Matriz lógica do mapa 5x5 (guardará os estados de cada célula)
+        let mapaDados = Array(25).fill('bloqueado');
 
-        function criarTabuleiro() {
+        function inicializarMapa() {
+            mapaDados = Array(25).fill('bloqueado');
+            for (let x = 0; x < 5; x++) {
+                for (let y = 0; y < 5; y++) {
+                    if (x < tamanhoMapaAtivo && y < tamanhoMapaAtivo) {
+                        mapaDados[x * 5 + y] = 'vazio';
+                    }
+                }
+            }
+        }
+
+        function renderizarTabuleiro() {
+            const tabuleiro = document.getElementById('tabuleiro');
             tabuleiro.innerHTML = '';
+            
             for (let i = 0; i < 25; i++) {
                 const celula = document.createElement('div');
                 celula.classList.add('celula');
-                celula.dataset.tipo = 'vazio';
-                celula.addEventListener('click', () => construir(celula));
+                
+                if (mapaDados[i] === 'bloqueado') {
+                    celula.classList.add('bloqueado');
+                    celula.innerText = '🔒';
+                } else if (mapaDados[i] === 'vazio') {
+                    celula.innerText = '';
+                } else {
+                    celula.classList.add(mapaDados[i]);
+                    celula.innerText = dadosConstrucao[mapaDados[i]].icone;
+                }
+
+                celula.addEventListener('click', () => interagirCelula(i));
                 tabuleiro.appendChild(celula);
             }
         }
 
         function selecionarConstrucao(tipo) {
-            if (tipo === 'tecnologia' && eraAtual < 2) {
-                alert("Bloqueado! Você precisa evoluir para a Era Mecanizada antes de usar Agrotech.");
-                return;
-            }
             construcaoSelecionada = tipo;
             document.querySelectorAll('.btn-construcao').forEach(btn => btn.classList.remove('selecionado'));
             document.getElementById(`btn-${tipo}`).classList.add('selecionado');
         }
 
-        function construir(celula) {
-            if (!construcaoSelecionada) {
-                alert("Selecione um elemento acima primeiro!");
+        function interagirCelula(indice) {
+            if (mapaDados[indice] === 'bloqueado') {
+                alert("Este lote está trancado! Use o botão 'Comprar Expansão' para liberar mais terras.");
                 return;
             }
-            if (celula.dataset.tipo !== 'vazio') {
-                alert("Este espaço já está em uso!");
+            if (!construcaoSelecionada) {
+                alert("Selecione uma ação no painel superior primeiro!");
                 return;
             }
 
-            const config = dadosConstrucao[construcaoSelecionada];
+            const tipoAcao = construcaoSelecionada;
+            const config = dadosConstrucao[tipoAcao];
+
+            // Mecânica de Limpeza / Trator
+            if (tipoAcao === 'trator') {
+                if (mapaDados[indice] === 'vazio') return;
+                if (moedas >= config.custo) {
+                    moedas -= config.custo;
+                    // Remove os impactos da estrutura antiga antes de limpar
+                    const tipoAntigo = mapaDados[indice];
+                    producao -= dadosConstrucao[tipoAntigo].prod;
+                    
+                    mapaDados[indice] = 'vazio';
+                    renderizarTabuleiro();
+                    atualizarInterface();
+                } else {
+                    alert("Sem dinheiro para operar o trator!");
+                }
+                return;
+            }
+
+            // Mecânica de Construção / Plantio
+            if (mapaDados[indice] !== 'vazio') {
+                alert("Lote ocupado! Use o Trator se quiser mudar a cultura deste espaço.");
+                return;
+            }
 
             if (moedas >= config.custo) {
                 moedas -= config.custo;
-                celula.classList.add(construcaoSelecionada);
-                celula.dataset.tipo = construcaoSelecionada;
-                celula.innerText = config.icone;
-                
+                mapaDados[indice] = tipoAcao;
                 producao += config.prod;
                 sustentabilidade = Math.min(100, Math.max(0, sustentabilidade + config.sust));
 
+                renderizarTabuleiro();
                 atualizarInterface();
                 verificarFimDeJogo();
             } else {
-                alert("Você não tem dinheiro suficiente!");
+                alert("Recursos insuficientes!");
+            }
+        }
+
+        function expandirTerras() {
+            if (tamanhoMapaAtivo >= 5) {
+                alert("Você já expandiu sua propriedade ao limite máximo permitido!");
+                return;
+            }
+            if (moedas >= 500) {
+                moedas -= 500;
+                tamanhoMapaAtivo++;
+                
+                // Libera as novas células na matriz de dados
+                for (let x = 0; x < 5; x++) {
+                    for (let y = 0; y < 5; y++) {
+                        if (x < tamanhoMapaAtivo && y < tamanhoMapaAtivo && mapaDados[x * 5 + y] === 'bloqueado') {
+                            mapaDados[x * 5 + y] = 'vazio';
+                        }
+                    }
+                }
+                renderizarTabuleiro();
+                atualizarInterface();
+            } else {
+                alert("Você precisa de R$ 500 para comprar novas terras!");
             }
         }
 
         function passarTurno() {
             if (producao === 0) {
-                alert("Plante alguma coisa antes de colher!");
+                alert("Sua fazenda não está produzindo nada para colher!");
                 return;
             }
 
-            // Processar Evento Aleatório (50% de chance de acontecer algo a cada ano)
-            let modificadorProdEvento = 0;
-            let modificadorSustEvento = 0;
+            let modProd = 0;
+            let modSust = 0;
             const caixaAlerta = document.getElementById('alerta-evento');
 
-            if (Math.random() > 0.5) {
-                const eventoSortear = eventosAdversos[Math.floor(Math.random() * eventosAdversos.length)];
-                modificadorProdEvento = eventoSortear.impactoProd;
-                modificadorSustEvento = eventoSortear.impactoSust;
-                
+            if (Math.random() > 0.4) {
+                const ev = eventosAdversos[Math.floor(Math.random() * eventosAdversos.length)];
+                modProd = ev.impactoProd;
+                modSust = ev.impactoSust;
                 caixaAlerta.style.display = "block";
-                caixaAlerta.innerText = `⚠️ ${eventoSortear.nome} - ${eventoSortear.msg}`;
+                caixaAlerta.innerText = `⚠️ ${ev.nome} - ${ev.msg}`;
             } else {
                 caixaAlerta.style.display = "none";
             }
 
-            // Cálculo da colheita aplicando modificador do evento
-            let producaoCalculada = Math.max(5, producao + modificadorProdEvento);
-            sustentabilidade = Math.min(100, Math.max(0, sustentabilidade + modificadorSustEvento));
+            let prodFinal = Math.max(5, producao + modProd);
+            sustentabilidade = Math.min(100, Math.max(0, sustentabilidade + modSust));
 
-            let multiplicadorSustentavel = sustentabilidade / 100;
-            if(multiplicadorSustentavel < 0.2) multiplicadorSustentavel = 0.2; 
+            let multSust = Math.max(0.1, sustentabilidade / 100);
+            let lucro = Math.floor(prodFinal * 12 * multSust);
+            moedas += lucro;
 
-            let lucroPrevisto = Math.floor(producaoCalculada * 10 * multiplicadorSustentavel);
-            moedas += lucroPrevisto;
-
-            // Checagem de evolução de Era
             atualizarEras();
             atualizarInterface();
             verificarFimDeJogo();
         }
 
         function atualizarEras() {
-            // Regras de evolução baseadas em metas de produção e sustentabilidade
-            if (eraAtual === 1 && moedas >= 1800 && sustentabilidade >= 60) {
+            if (eraAtual === 1 && moedas >= 1500) {
                 eraAtual = 2;
-                alert("🎉 PARABÉNS! Você evoluiu para a ERA MECANIZADA! Agora tratores modernos aumentam sua eficiência e o botão Agrotech foi liberado!");
-            } else if (eraAtual === 2 && moedas >= 3500 && sustentabilidade >= 80) {
+                document.getElementById('btn-soja').disabled = false;
+                alert("🚜 ERA MECANIZADA! Cultura da Soja liberada no menu superior.");
+            } else if (eraAtual === 2 && moedas >= 3000 && sustentabilidade >= 75) {
                 eraAtual = 3;
-                alert("🚀 SENSACIONAL! Você atingiu a ERA DIGITAL E SUSTENTÁVEL! O Agro forte encontrou o equilíbrio perfeito com a preservação!");
+                document.getElementById('btn-bio').disabled = false;
+                alert("🛰️ ERA DIGITAL SUSTENTÁVEL! Alta tecnologia de Bioinsumos liberada. Produza em massa protegendo a natureza!");
             }
         }
 
         function verificarFimDeJogo() {
             if (sustentabilidade <= 0) {
-                alert("🚨 FIM DE JOGO! A degradação ambiental extrema inviabilizou a agricultura na região. Tente equilibrar melhor a produção e a reserva na próxima vez!");
+                alert("🚨 FIM DE JOGO! A degradação ambiental extrema quebrou a fazenda.");
                 reiniciarJogo();
             }
         }
@@ -316,33 +378,34 @@
             moedas = 1000;
             producao = 0;
             sustentabilidade = 100;
-            construcaoSelecionada = null;
+            tamanhoMapaAtivo = 3;
             eraAtual = 1;
+            construcaoSelecionada = null;
+            document.getElementById('btn-soja').disabled = true;
+            document.getElementById('btn-bio').disabled = true;
             document.getElementById('alerta-evento').style.display = "none";
             document.querySelectorAll('.btn-construcao').forEach(btn => btn.classList.remove('selecionado'));
-            criarTabuleiro();
+            inicializarMapa();
+            renderizarTabuleiro();
             atualizarInterface();
         }
 
         function atualizarInterface() {
             document.getElementById('txt-moedas').innerText = `R$ ${moedas}`;
-            document.getElementById('txt-producao').innerText = `${producao} sc/ano`;
+            document.getElementById('txt-producao').innerText = `${producao} sc`;
             document.getElementById('txt-sustentabilidade').innerText = `${sustentabilidade}%`;
+            document.getElementById('txt-tamanho').innerText = `${tamanhoMapaAtivo} x ${tamanhoMapaAtivo}`;
 
-            // Atualiza texto da era
             const txtEra = document.getElementById('txt-era');
             if (eraAtual === 1) txtEra.innerText = "🌾 Tradicional";
             if (eraAtual === 2) txtEra.innerText = "🚜 Mecanizada";
-            if (eraAtual === 3) txtEra.innerText = "🛰️ Digital / Sustentável";
+            if (eraAtual === 3) txtEra.innerText = "🛰️ Sustentável";
 
-            if (sustentabilidade <= 30) {
-                document.getElementById('txt-sustentabilidade').style.color = 'red';
-            } else {
-                document.getElementById('txt-sustentabilidade').style.color = 'var(--primary)';
-            }
+            document.getElementById('txt-sustentabilidade').style.color = sustentabilidade <= 30 ? 'red' : 'var(--primary)';
         }
 
-        criarTabuleiro();
+        inicializarMapa();
+        renderizarTabuleiro();
     </script>
 </body>
 </html>
