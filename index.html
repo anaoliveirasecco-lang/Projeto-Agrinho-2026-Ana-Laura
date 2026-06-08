@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgroSustentável: O Simulador</title>
+    <title>AgroSustentável: O Jogo do Agrinho</title>
     <style>
         :root {
             --primary: #2e7d32;
@@ -26,29 +26,49 @@
         header {
             text-align: center;
             color: var(--dark);
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
-        #painel-status {
+        #paineis-container {
             display: flex;
-            gap: 20px;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .painel-box {
             background: white;
-            padding: 15px 30px;
+            padding: 15px 25px;
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
             font-weight: bold;
-        }
-
-        .status-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            text-align: center;
         }
 
         .status-valor {
             font-size: 1.2rem;
             color: var(--primary);
+            display: block;
+            margin-top: 5px;
+        }
+
+        #txt-era {
+            color: #0d47a1;
+            font-size: 1.3rem;
+        }
+
+        #alerta-evento {
+            background-color: #ffe082;
+            border: 2px solid #ffb300;
+            color: #5d4037;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            max-width: 440px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
         }
 
         #controles {
@@ -129,24 +149,30 @@
 <body>
 
     <header>
-        <h1>AgroSustentável: O Jogo do Agrinho</h1>
-        <p>Combine produção forte com proteção ao meio ambiente!</p>
+        <h1>AgroSustentável: Eras do Campo</h1>
+        <p>Evolua sua tecnologia e vença os desafios do clima e das pragas!</p>
     </header>
 
-    <section id="painel-status">
-        <div class="status-item">
+    <section id="paineis-container">
+        <div class="painel-box">
+            <span>Era Atual</span>
+            <span id="txt-era" class="status-valor">🌾 Tradicional</span>
+        </div>
+        <div class="painel-box">
             <span>Caixa</span>
             <span id="txt-moedas" class="status-valor">R$ 1000</span>
         </div>
-        <div class="status-item">
-            <span>Produção Total</span>
+        <div class="painel-box">
+            <span>Produção</span>
             <span id="txt-producao" class="status-valor">0 sc/ano</span>
         </div>
-        <div class="status-item">
+        <div class="painel-box">
             <span>Sustentabilidade</span>
             <span id="txt-sustentabilidade" class="status-valor">100%</span>
         </div>
     </section>
+
+    <div id="alerta-evento">⚠️ Evento: Nenhuma adversidade reportada.</div>
 
     <section id="controles">
         <button id="btn-lavoura" class="btn-construcao" onclick="selecionarConstrucao('lavoura')">Plantio Convencional (-R$100)</button>
@@ -163,12 +189,21 @@
         let producao = 0;
         let sustentabilidade = 100;
         let construcaoSelecionada = null;
+        let eraAtual = 1; // 1: Tradicional, 2: Mecanizada, 3: Digital / Sustentável
 
         const dadosConstrucao = {
             lavoura: { custo: 100, prod: 30, sust: -15, icone: '🌾' },
             reserva: { custo: 150, prod: 0, sust: 20, icone: '🌳' },
             tecnologia: { custo: 300, prod: 60, sust: 5, icone: '🛸' }
         };
+
+        // Lista de adversidades aleatórias
+        const eventosAdversos = [
+            { nome: "🐛 Ataque de Pragas!", impactoProd: -15, impactoSust: -5, msg: "Insetos atacaram suas lavouras! A produção caiu." },
+            { nome: "☀️ Seca Prolongada!", impactoProd: -20, impactoSust: 0, msg: "Falta de chuva na região! O rendimento da colheita diminuiu." },
+            { nome: "❄️ Geada Forte!", impactoProd: -25, impactoSust: -5, msg: "O frio queimou parte das plantas. Perdas financeiras registradas." },
+            { nome: "🌱 Clima Perfeito!", impactoProd: 15, impactoSust: 5, msg: "Tempo bom! Bônus de produção e recuperação ambiental neste ano." }
+        ];
 
         const tabuleiro = document.getElementById('tabuleiro');
 
@@ -184,6 +219,10 @@
         }
 
         function selecionarConstrucao(tipo) {
+            if (tipo === 'tecnologia' && eraAtual < 2) {
+                alert("Bloqueado! Você precisa evoluir para a Era Mecanizada antes de usar Agrotech.");
+                return;
+            }
             construcaoSelecionada = tipo;
             document.querySelectorAll('.btn-construcao').forEach(btn => btn.classList.remove('selecionado'));
             document.getElementById(`btn-${tipo}`).classList.add('selecionado');
@@ -217,29 +256,58 @@
             }
         }
 
-        // Nova mecânica ativa de Turnos (Colheita)
         function passarTurno() {
             if (producao === 0) {
                 alert("Plante alguma coisa antes de colher!");
                 return;
             }
 
-            // O lucro depende da sustentabilidade (Agro em equilíbrio rende mais!)
+            // Processar Evento Aleatório (50% de chance de acontecer algo a cada ano)
+            let modificadorProdEvento = 0;
+            let modificadorSustEvento = 0;
+            const caixaAlerta = document.getElementById('alerta-evento');
+
+            if (Math.random() > 0.5) {
+                const eventoSortear = eventosAdversos[Math.floor(Math.random() * eventosAdversos.length)];
+                modificadorProdEvento = eventoSortear.impactoProd;
+                modificadorSustEvento = eventoSortear.impactoSust;
+                
+                caixaAlerta.style.display = "block";
+                caixaAlerta.innerText = `⚠️ ${eventoSortear.nome} - ${eventoSortear.msg}`;
+            } else {
+                caixaAlerta.style.display = "none";
+            }
+
+            // Cálculo da colheita aplicando modificador do evento
+            let producaoCalculada = Math.max(5, producao + modificadorProdEvento);
+            sustentabilidade = Math.min(100, Math.max(0, sustentabilidade + modificadorSustEvento));
+
             let multiplicadorSustentavel = sustentabilidade / 100;
-            // Garante uma renda mínima de 20% da produção para o jogador nunca travar totalmente
             if(multiplicadorSustentavel < 0.2) multiplicadorSustentavel = 0.2; 
 
-            let lucroPrevisto = Math.floor(producao * 10 * multiplicadorSustentavel);
+            let lucroPrevisto = Math.floor(producaoCalculada * 10 * multiplicadorSustentavel);
             moedas += lucroPrevisto;
 
-            alert(`Ano Finalizado! Sua colheita rendeu: R$ ${lucroPrevisto}`);
+            // Checagem de evolução de Era
+            atualizarEras();
             atualizarInterface();
             verificarFimDeJogo();
         }
 
+        function atualizarEras() {
+            // Regras de evolução baseadas em metas de produção e sustentabilidade
+            if (eraAtual === 1 && moedas >= 1800 && sustentabilidade >= 60) {
+                eraAtual = 2;
+                alert("🎉 PARABÉNS! Você evoluiu para a ERA MECANIZADA! Agora tratores modernos aumentam sua eficiência e o botão Agrotech foi liberado!");
+            } else if (eraAtual === 2 && moedas >= 3500 && sustentabilidade >= 80) {
+                eraAtual = 3;
+                alert("🚀 SENSACIONAL! Você atingiu a ERA DIGITAL E SUSTENTÁVEL! O Agro forte encontrou o equilíbrio perfeito com a preservação!");
+            }
+        }
+
         function verificarFimDeJogo() {
             if (sustentabilidade <= 0) {
-                alert("🚨 FIM DE JOGO! A falta de sustentabilidade esgotou os recursos da região e causou multas severas. Lembre-se: no Agrinho, precisamos de equilíbrio!");
+                alert("🚨 FIM DE JOGO! A degradação ambiental extrema inviabilizou a agricultura na região. Tente equilibrar melhor a produção e a reserva na próxima vez!");
                 reiniciarJogo();
             }
         }
@@ -249,6 +317,8 @@
             producao = 0;
             sustentabilidade = 100;
             construcaoSelecionada = null;
+            eraAtual = 1;
+            document.getElementById('alerta-evento').style.display = "none";
             document.querySelectorAll('.btn-construcao').forEach(btn => btn.classList.remove('selecionado'));
             criarTabuleiro();
             atualizarInterface();
@@ -258,6 +328,12 @@
             document.getElementById('txt-moedas').innerText = `R$ ${moedas}`;
             document.getElementById('txt-producao').innerText = `${producao} sc/ano`;
             document.getElementById('txt-sustentabilidade').innerText = `${sustentabilidade}%`;
+
+            // Atualiza texto da era
+            const txtEra = document.getElementById('txt-era');
+            if (eraAtual === 1) txtEra.innerText = "🌾 Tradicional";
+            if (eraAtual === 2) txtEra.innerText = "🚜 Mecanizada";
+            if (eraAtual === 3) txtEra.innerText = "🛰️ Digital / Sustentável";
 
             if (sustentabilidade <= 30) {
                 document.getElementById('txt-sustentabilidade').style.color = 'red';
