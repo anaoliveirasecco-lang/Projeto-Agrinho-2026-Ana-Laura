@@ -3,409 +3,386 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgroSustentável: O Jogo do Agrinho Pro</title>
+    <title>AgroSustentável: Minha Fazenda</title>
     <style>
         :root {
-            --primary: #2e7d32;
-            --primary-light: #4caf50;
-            --accent: #ffb300;
-            --dark: #1b5e20;
-            --bg: #e8f5e9;
+            --grama: #4caf50;
+            --terra: #8d6e63;
+            --terra-escura: #5d4037;
+            --pista: #ffd54f;
+            --interface: #f5deb3;
         }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg);
+            background-color: #2e7d32;
             margin: 0;
             padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            user-select: none;
         }
 
-        header {
-            text-align: center;
-            color: var(--dark);
-            margin-bottom: 15px;
-        }
-
-        #paineis-container {
+        /* Top Bar - Caixa e Status */
+        #topo-fazenda {
             display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .painel-box {
-            background: white;
-            padding: 12px 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            font-weight: bold;
-            text-align: center;
-            min-width: 100px;
-        }
-
-        .status-valor {
-            font-size: 1.2rem;
-            color: var(--primary);
-            display: block;
-            margin-top: 5px;
-        }
-
-        #alerta-evento {
-            background-color: #ffe082;
-            border: 2px solid #ffb300;
-            color: #5d4037;
-            padding: 12px;
+            gap: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 25px;
             border-radius: 8px;
-            margin-bottom: 20px;
-            max-width: 500px;
-            text-align: center;
+            border: 3px solid #8d6e63;
             font-weight: bold;
-            display: none;
-        }
-
-        #controles {
             margin-bottom: 15px;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-            max-width: 600px;
+            font-size: 1.1rem;
         }
 
-        .btn-construcao {
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.2s;
+        /* Cenário Principal do Jogo */
+        #cenario {
+            position: relative;
+            width: 800px;
+            height: 550px;
+            background-color: var(--grama);
+            border: 6px solid #388e3c;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 12px 24px rgba(0,0,0,0.3);
         }
 
-        .btn-construcao:hover { transform: scale(1.05); }
-        .btn-construcao:disabled { background-color: #bdbdbd !important; color: #757575; cursor: not-allowed; transform: none; }
-
-        #btn-milho { background-color: #fff59d; color: #5d4037; }
-        #btn-soja { background-color: #c5e1a5; color: #33691e; }
-        #btn-bio { background-color: #80deea; color: #006064; }
-        #btn-reserva { background-color: #a5d6a7; color: #1b5e20; }
-        #btn-trator { background-color: #ef9a9a; color: #b71c1c; }
-
-        #acoes-globais {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .btn-global {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 1rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        #btn-turno { background-color: #e65100; color: white; }
-        #btn-expandir { background-color: #0288d1; color: white; }
-
-        .selecionado { outline: 3px solid black; }
-
-        #tabuleiro {
-            display: grid;
-            grid-template-columns: repeat(5, 80px);
-            grid-template-rows: repeat(5, 80px);
-            gap: 5px;
-            background: #a1887f;
-            padding: 10px;
-            border-radius: 8px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-        }
-
-        .celula {
-            background-color: #8d6e63;
-            border-radius: 4px;
-            cursor: pointer;
+        /* Elementos Decorativos Fixos baseados na sua imagem */
+        #lago {
+            position: absolute;
+            top: 180px;
+            left: 200px;
+            width: 160px;
+            height: 100px;
+            background-color: #4fc3f7;
+            border-radius: 30% 40% 30% 50%;
+            border: 4px solid #00b0ff;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
-            transition: background 0.3s;
+            font-size: 1.2rem;
         }
 
-        .bloqueado {
-            background-color: #4e342e;
-            cursor: not-allowed;
-            color: #795548;
-            font-size: 1rem;
+        #caminhao {
+            position: absolute;
+            top: 100px;
+            left: 30px;
+            width: 90px;
+            height: 55px;
+            background-color: #1565c0;
+            border-radius: 5px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        #caminhao:hover { filter: brightness(1.2); }
+
+        /* Estradas de terra amarela */
+        .estrada-h {
+            position: absolute;
+            top: 120px;
+            left: 120px;
+            width: 500px;
+            height: 30px;
+            background-color: var(--pista);
+            opacity: 0.8;
+        }
+        .estrada-v {
+            position: absolute;
+            top: 120px;
+            left: 380px;
+            width: 30px;
+            height: 430px;
+            background-color: var(--pista);
+            opacity: 0.8;
         }
 
-        .celula:not(.bloqueado):hover { filter: brightness(1.2); }
-        .milho { background-color: #fff59d; }
-        .soja { background-color: #c5e1a5; }
-        .bio { background-color: #80deea; }
-        .reserva { background-color: #a5d6a7; }
+        /* Lotes de Terra (Os terrenos marrons para plantar) */
+        .lote-terra {
+            position: absolute;
+            width: 130px;
+            height: 90px;
+            background-color: var(--terra);
+            border: 3px dashed var(--terra-escura);
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            color: white;
+            transition: 0.2s;
+        }
+        .lote-terra:hover { background-color: var(--terra-escura); transform: scale(1.02); }
+
+        /* Posicionamento dos lotes simulando o mapa */
+        #lote1 { top: 380px; left: 240px; }
+        #lote2 { top: 240px; left: 450px; }
+        #lote3 { top: 240px; left: 620px; }
+        #lote4 { top: 360px; left: 450px; }
+        #lote5 { top: 360px; left: 620px; }
+
+        /* Botões de Interface Inferiores */
+        #hud-botoes {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            display: flex;
+            gap: 15px;
+            z-index: 10;
+        }
+
+        .btn-hud {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 3px solid #5d4037;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            flex-direction: column;
+        }
+        #btn-loja-janela { background-color: #ffb300; color: #5d4037; }
+        #btn-armazem-janela { background-color: #a1887f; color: white; }
+
+        /* Janelas Modais (Menus de Loja / Armazém / Caminhão) */
+        .janela-modal {
+            position: absolute;
+            top: 50px;
+            left: 150px;
+            width: 500px;
+            background-color: var(--interface);
+            border: 5px solid #5d4037;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            display: none;
+            z-index: 100;
+        }
+
+        .janela-titulo {
+            text-align: center;
+            margin-top: 0;
+            color: #5d4037;
+            border-bottom: 2px solid #5d4037;
+            padding-bottom: 10px;
+        }
+
+        .grid-loja {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+
+        .item-loja {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #8d6e63;
+            width: 110px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .item-loja:hover { transform: translateY(-5px); background-color: #fff8e1; }
+
+        .btn-fechar {
+            display: block;
+            margin: 20px auto 0 auto;
+            padding: 8px 20px;
+            background-color: #d32f2f;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>AgroSustentável: Simulador de Gestão</h1>
-        <p>Gerencie o espaço, mude suas culturas e expanda suas terras com equilíbrio!</p>
-    </header>
-
-    <section id="paineis-container">
-        <div class="painel-box"><span>Era Atual</span><span id="txt-era" class="status-valor" style="color:#0d47a1;">🌾 Inicial</span></div>
-        <div class="painel-box"><span>Caixa</span><span id="txt-moedas" class="status-valor">R$ 1000</span></div>
-        <div class="painel-box"><span>Produção</span><span id="txt-producao" class="status-valor">0 sc</span></div>
-        <div class="painel-box"><span>Sustentabilidade</span><span id="txt-sustentabilidade" class="status-valor">100%</span></div>
-        <div class="painel-box"><span>Tamanho Mapa</span><span id="txt-tamanho" class="status-valor">3 x 3</span></div>
-    </section>
-
-    <div id="alerta-evento">⚠️ Evento: Nenhuma adversidade reportada.</div>
-
-    <section id="controles">
-        <button id="btn-milho" class="btn-construcao" onclick="selecionarConstrucao('milho')">🌽 Plantar Milho (-R$80)</button>
-        <button id="btn-soja" class="btn-construcao" onclick="selecionarConstrucao('soja')" disabled>🌱 Plantar Soja (-R$150)</button>
-        <button id="btn-bio" class="btn-construcao" onclick="selecionarConstrucao('bio')" disabled>🛸 Bioinsumos Agrotech (-R$300)</button>
-        <button id="btn-reserva" class="btn-construcao" onclick="selecionarConstrucao('reserva')">🌳 Reserva Legal (-R$100)</button>
-        <button id="btn-trator" class="btn-construcao" onclick="selecionarConstrucao('trator')">🚜 Trator / Limpar Solo (-R$30)</button>
-    </section>
-
-    <div id="acoes-globais">
-        <button id="btn-turno" class="btn-global" onclick="passarTurno()">🗓️ AVANÇAR ANO & COLHER</button>
-        <button id="btn-expandir" class="btn-global" onclick="expandirTerras()">🗺️ COMPRAR EXPANSÃO (-R$500)</button>
+    <div id="topo-fazenda">
+        <span>💰 Caixa: R$ <span id="txt-moedas">1000</span></span>
+        <span>🌳 Sustentabilidade: <span id="txt-sustentabilidade">100%</span></span>
     </div>
 
-    <main id="tabuleiro"></main>
+    <div id="cenario">
+        <div class="estrada-h"></div>
+        <div class="estrada-v"></div>
+
+        <div id="lago">🦆🦆</div>
+        <div id="caminhao" onclick="abrirVendas()">🚚 Vender</div>
+
+        <div id="lote1" class="lote-terra" onclick="clicarTerreno(0)"></div>
+        <div id="lote2" class="lote-terra" onclick="clicarTerreno(1)"></div>
+        <div id="lote3" class="lote-terra" onclick="clicarTerreno(2)"></div>
+        <div id="lote4" class="lote-terra" onclick="clicarTerreno(3)"></div>
+        <div id="lote5" class="lote-terra" onclick="clicarTerreno(4)"></div>
+
+        <div id="hud-botoes">
+            <button id="btn-loja-janela" class="btn-hud" onclick="abrirJanela('modal-loja')">🛒<br>Loja</button>
+            <button id="btn-armazem-janela" class="btn-hud" onclick="abrirJanela('modal-armazem')">📦<br>Armazém</button>
+        </div>
+
+        <div id="modal-loja" class="janela-modal">
+            <h2 class="janela-titulo">Mercado do Campo</h2>
+            <div class="grid-loja">
+                <div class="item-loja" onclick="comprarItem('semente', 100)">
+                    <b style="font-size: 1.5rem;">🌾</b>
+                    <p>Sementes<br><b>R$ 100</b></p>
+                </div>
+                <div class="item-loja" onclick="comprarItem('animal', 150)">
+                    <b style="font-size: 1.5rem;">🐄</b>
+                    <p>Animais<br><b>R$ 150</b></p>
+                </div>
+                <div class="item-loja" onclick="comprarItem('reserva', 200)">
+                    <b style="font-size: 1.5rem;">🌳</b>
+                    <p>Árvores Eco<br><b>R$ 200</b></p>
+                </div>
+            </div>
+            <button class="btn-fechar" onclick="fecharJanelas()">EXIT</button>
+        </div>
+
+        <div id="modal-armazem" class="janela-modal">
+            <h2 class="janela-titulo">Armazém da Fazenda</h2>
+            <div style="padding: 10px; font-size: 1.1rem; line-height: 1.8;">
+                • Sementes no estoque: <span id="stk-semente">2</span><br>
+                • Animais na Fazenda: <span id="stk-animal">0</span><br>
+                • Colheita Pronta: <span id="stk-colheita">0</span> caixas
+            </div>
+            <button class="btn-fechar" onclick="fecharJanelas()">EXIT</button>
+        </div>
+
+        <div id="modal-vendas" class="janela-modal">
+            <h2 class="janela-titulo">Despachar Caminhão 🚚</h2>
+            <p style="text-align: center;">Venda sua colheita estocada para os mercados locais!</p>
+            <div style="text-align: center; margin: 20px 0;">
+                <button onclick="despacharCaminhao()" style="background-color: #2e7d32; color: white; padding: 12px 30px; font-size: 1.1rem; font-weight: bold; border: none; border-radius: 5px; cursor: pointer;">START VENDAS</button>
+            </div>
+            <button class="btn-fechar" onclick="fecharJanelas()">EXIT</button>
+        </div>
+
+    </div>
 
     <script>
+        // Variáveis de Economia e Inventário
         let moedas = 1000;
-        let producao = 0;
         let sustentabilidade = 100;
-        let construcaoSelecionada = null;
-        let eraAtual = 1; 
-        let tamanhoMapa Ativo = 3; // Começa 3x3, expande até 5x5
-
-        const dadosConstrucao = {
-            milho: { custo: 80, prod: 25, sust: -10, icone: '🌽' },
-            soja: { custo: 150, prod: 55, sust: -15, icone: '🌱' },
-            bio: { custo: 300, prod: 90, sust: 10, icone: '🛸' },
-            reserva: { custo: 100, prod: 0, sust: 20, icone: '🌳' },
-            trator: { custo: 30, prod: 0, sust: 0, icone: '' }
+        
+        let estoque = {
+            semente: 2, // Começa com 2 sementes grátis para o jogador testar
+            animal: 0,
+            colheita: 0
         };
 
-        const eventosAdversos = [
-            { nome: "🐛 Ataque de Pragas!", impactoProd: -20, impactoSust: -5, msg: "Insetos atingiram a lavoura tradicional. Lavouras de tecnologia Bio sofreram menos impacto!" },
-            { nome: "☀️ Seca Severa!", impactoProd: -30, impactoSust: 0, msg: "Falta d'água reduziu a colheita geral." },
-            { nome: "🌱 Clima Ideal!", impactoProd: 20, impactoSust: 5, msg: "Condições perfeitas aumentaram o ganho da safra!" }
-        ];
+        // Estado dos 5 lotes (vazio, plantado, colhido, reserva)
+        let terrenos = ['vazio', 'vazio', 'vazio', 'vazio', 'vazio'];
 
-        // Matriz lógica do mapa 5x5 (guardará os estados de cada célula)
-        let mapaDados = Array(25).fill('bloqueado');
-
-        function inicializarMapa() {
-            mapaDados = Array(25).fill('bloqueado');
-            for (let x = 0; x < 5; x++) {
-                for (let y = 0; y < 5; y++) {
-                    if (x < tamanhoMapaAtivo && y < tamanhoMapaAtivo) {
-                        mapaDados[x * 5 + y] = 'vazio';
-                    }
-                }
-            }
+        function abrirJanela(id) {
+            fecharJanelas();
+            document.getElementById(id).style.display = 'block';
         }
 
-        function renderizarTabuleiro() {
-            const tabuleiro = document.getElementById('tabuleiro');
-            tabuleiro.innerHTML = '';
-            
-            for (let i = 0; i < 25; i++) {
-                const celula = document.createElement('div');
-                celula.classList.add('celula');
+        function fecharJanelas() {
+            document.getElementById('modal-loja').style.display = 'none';
+            document.getElementById('modal-armazem').style.display = 'none';
+            document.getElementById('modal-vendas').style.display = 'none';
+        }
+
+        function comprarItem(tipo, custo) {
+            if (moedas >= custo) {
+                moedas -= custo;
+                estoque[tipo]++;
                 
-                if (mapaDados[i] === 'bloqueado') {
-                    celula.classList.add('bloqueado');
-                    celula.innerText = '🔒';
-                } else if (mapaDados[i] === 'vazio') {
-                    celula.innerText = '';
-                } else {
-                    celula.classList.add(mapaDados[i]);
-                    celula.innerText = dadosConstrucao[mapaDados[i]].icone;
+                // Se comprar reserva (árvore), ganha bônus de sustentabilidade imediatamente
+                if (tipo === 'reserva') {
+                    sustentabilidade = Math.min(100, sustentabilidade + 10);
                 }
-
-                celula.addEventListener('click', () => interagirCelula(i));
-                tabuleiro.appendChild(celula);
-            }
-        }
-
-        function selecionarConstrucao(tipo) {
-            construcaoSelecionada = tipo;
-            document.querySelectorAll('.btn-construcao').forEach(btn => btn.classList.remove('selecionado'));
-            document.getElementById(`btn-${tipo}`).classList.add('selecionado');
-        }
-
-        function interagirCelula(indice) {
-            if (mapaDados[indice] === 'bloqueado') {
-                alert("Este lote está trancado! Use o botão 'Comprar Expansão' para liberar mais terras.");
-                return;
-            }
-            if (!construcaoSelecionada) {
-                alert("Selecione uma ação no painel superior primeiro!");
-                return;
-            }
-
-            const tipoAcao = construcaoSelecionada;
-            const config = dadosConstrucao[tipoAcao];
-
-            // Mecânica de Limpeza / Trator
-            if (tipoAcao === 'trator') {
-                if (mapaDados[indice] === 'vazio') return;
-                if (moedas >= config.custo) {
-                    moedas -= config.custo;
-                    // Remove os impactos da estrutura antiga antes de limpar
-                    const tipoAntigo = mapaDados[indice];
-                    producao -= dadosConstrucao[tipoAntigo].prod;
-                    
-                    mapaDados[indice] = 'vazio';
-                    renderizarTabuleiro();
-                    atualizarInterface();
-                } else {
-                    alert("Sem dinheiro para operar o trator!");
-                }
-                return;
-            }
-
-            // Mecânica de Construção / Plantio
-            if (mapaDados[indice] !== 'vazio') {
-                alert("Lote ocupado! Use o Trator se quiser mudar a cultura deste espaço.");
-                return;
-            }
-
-            if (moedas >= config.custo) {
-                moedas -= config.custo;
-                mapaDados[indice] = tipoAcao;
-                producao += config.prod;
-                sustentabilidade = Math.min(100, Math.max(0, sustentabilidade + config.sust));
-
-                renderizarTabuleiro();
-                atualizarInterface();
-                verificarFimDeJogo();
+                
+                atualizarHUD();
+                alert(`Sucesso! Item adicionado ao seu armazém.`);
             } else {
-                alert("Recursos insuficientes!");
+                alert("Moedas insuficientes na conta!");
             }
         }
 
-        function expandirTerras() {
-            if (tamanhoMapaAtivo >= 5) {
-                alert("Você já expandiu sua propriedade ao limite máximo permitido!");
-                return;
-            }
-            if (moedas >= 500) {
-                moedas -= 500;
-                tamanhoMapaAtivo++;
-                
-                // Libera as novas células na matriz de dados
-                for (let x = 0; x < 5; x++) {
-                    for (let y = 0; y < 5; y++) {
-                        if (x < tamanhoMapaAtivo && y < tamanhoMapaAtivo && mapaDados[x * 5 + y] === 'bloqueado') {
-                            mapaDados[x * 5 + y] = 'vazio';
+        function clicarTerreno(indice) {
+            let statusAtual = terrenos[indice];
+            const divLote = document.getElementById(`lote${indice + 1}`);
+
+            if (statusAtual === 'vazio') {
+                // Tenta plantar usando semente do armazém
+                if (estoque.semente > 0) {
+                    estoque.semente--;
+                    terrenos[indice] = 'plantado';
+                    divLote.innerText = '🌱';
+                    sustentabilidade = Math.max(0, sustentabilidade - 5); // Lavoura comum puxa recursos do solo
+
+                    // Inicia o crescimento (Simulação de tempo de colheita)
+                    setTimeout(() => {
+                        if (terrenos[indice] === 'plantado') {
+                            terrenos[indice] = 'pronto';
+                            divLote.innerText = '🌾✨';
                         }
-                    }
+                    }, 4000); // 4 segundos para crescer
+                } else {
+                    alert("Você não tem sementes! Vá até a Loja🛒 para comprar.");
                 }
-                renderizarTabuleiro();
-                atualizarInterface();
+            } else if (statusAtual === 'pronto') {
+                // Coleta o insumo produzido
+                terrenos[indice] = 'vazio';
+                divLote.innerText = '';
+                estoque.colheita += 10; // Rende 10 caixas
+                alert("Safra colhida com sucesso! Enviada ao Armazém.");
+            }
+            atualizarHUD();
+        }
+
+        function abrirVendas() {
+            abrirJanela('modal-vendas');
+        }
+
+        function despacharCaminhao() {
+            if (estoque.colheita > 0) {
+                // O lucro depende do nível de sustentabilidade da fazenda
+                let fatorSustentavel = sustentabilidade / 100;
+                if(fatorSustentavel < 0.3) fatorSustentavel = 0.3; // Mínimo de garantia financeira
+
+                let ganho = Math.floor(estoque.colheita * 15 * fatorSustentavel);
+                moedas += ganho;
+                alert(`🚚 O caminhão vendeu sua produção e retornou trazendo R$ ${ganho}!`);
+                estoque.colheita = 0;
+                fecharJanelas();
+                atualizarHUD();
             } else {
-                alert("Você precisa de R$ 500 para comprar novas terras!");
+                alert("Seu armazém está vazio! Plante e colha nos terrenos antes de vender.");
             }
         }
 
-        function passarTurno() {
-            if (producao === 0) {
-                alert("Sua fazenda não está produzindo nada para colher!");
-                return;
-            }
-
-            let modProd = 0;
-            let modSust = 0;
-            const caixaAlerta = document.getElementById('alerta-evento');
-
-            if (Math.random() > 0.4) {
-                const ev = eventosAdversos[Math.floor(Math.random() * eventosAdversos.length)];
-                modProd = ev.impactoProd;
-                modSust = ev.impactoSust;
-                caixaAlerta.style.display = "block";
-                caixaAlerta.innerText = `⚠️ ${ev.nome} - ${ev.msg}`;
-            } else {
-                caixaAlerta.style.display = "none";
-            }
-
-            let prodFinal = Math.max(5, producao + modProd);
-            sustentabilidade = Math.min(100, Math.max(0, sustentabilidade + modSust));
-
-            let multSust = Math.max(0.1, sustentabilidade / 100);
-            let lucro = Math.floor(prodFinal * 12 * multSust);
-            moedas += lucro;
-
-            atualizarEras();
-            atualizarInterface();
-            verificarFimDeJogo();
-        }
-
-        function atualizarEras() {
-            if (eraAtual === 1 && moedas >= 1500) {
-                eraAtual = 2;
-                document.getElementById('btn-soja').disabled = false;
-                alert("🚜 ERA MECANIZADA! Cultura da Soja liberada no menu superior.");
-            } else if (eraAtual === 2 && moedas >= 3000 && sustentabilidade >= 75) {
-                eraAtual = 3;
-                document.getElementById('btn-bio').disabled = false;
-                alert("🛰️ ERA DIGITAL SUSTENTÁVEL! Alta tecnologia de Bioinsumos liberada. Produza em massa protegendo a natureza!");
-            }
-        }
-
-        function verificarFimDeJogo() {
-            if (sustentabilidade <= 0) {
-                alert("🚨 FIM DE JOGO! A degradação ambiental extrema quebrou a fazenda.");
-                reiniciarJogo();
-            }
-        }
-
-        function reiniciarJogo() {
-            moedas = 1000;
-            producao = 0;
-            sustentabilidade = 100;
-            tamanhoMapaAtivo = 3;
-            eraAtual = 1;
-            construcaoSelecionada = null;
-            document.getElementById('btn-soja').disabled = true;
-            document.getElementById('btn-bio').disabled = true;
-            document.getElementById('alerta-evento').style.display = "none";
-            document.querySelectorAll('.btn-construcao').forEach(btn => btn.classList.remove('selecionado'));
-            inicializarMapa();
-            renderizarTabuleiro();
-            atualizarInterface();
-        }
-
-        function atualizarInterface() {
-            document.getElementById('txt-moedas').innerText = `R$ ${moedas}`;
-            document.getElementById('txt-producao').innerText = `${producao} sc`;
+        function atualizarHUD() {
+            document.getElementById('txt-moedas').innerText = moedas;
             document.getElementById('txt-sustentabilidade').innerText = `${sustentabilidade}%`;
-            document.getElementById('txt-tamanho').innerText = `${tamanhoMapaAtivo} x ${tamanhoMapaAtivo}`;
-
-            const txtEra = document.getElementById('txt-era');
-            if (eraAtual === 1) txtEra.innerText = "🌾 Tradicional";
-            if (eraAtual === 2) txtEra.innerText = "🚜 Mecanizada";
-            if (eraAtual === 3) txtEra.innerText = "🛰️ Sustentável";
-
-            document.getElementById('txt-sustentabilidade').style.color = sustentabilidade <= 30 ? 'red' : 'var(--primary)';
+            
+            // Atualiza dados internos do armazém visual
+            document.getElementById('stk-semente').innerText = estoque.semente;
+            document.getElementById('stk-animal').innerText = estoque.animal;
+            document.getElementById('stk-colheita').innerText = estoque.colheita;
         }
 
-        inicializarMapa();
-        renderizarTabuleiro();
+        // Configuração inicial das caixas do mapa
+        atualizarHUD();
     </script>
 </body>
 </html>
