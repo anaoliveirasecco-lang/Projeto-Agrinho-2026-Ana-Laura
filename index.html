@@ -156,7 +156,7 @@
 
         const tabuleiro = document.getElementById('tabuleiro');
 
-        // Inicializa o Tabuleiro 5x5
+        // Inicializa o Tabuleiro 5x5 automaticamente ao carregar
         function criarTabuleiro() {
             for (let i = 0; i < 25; i++) {
                 const celula = document.createElement('div');
@@ -176,8 +176,14 @@
 
         // Aplica a construção na célula
         function construir(celula) {
-            if (!construcaoSelecionada) return alert("Selecione uma estrutura antes!");
-            if (celula.dataset.tipo !== 'vazio') return alert("Esta área já está ocupada!");
+            if (!construcaoSelecionada) {
+                alert("Selecione um botão de estrutura antes (Plantio, Reserva ou Agrotech)!");
+                return;
+            }
+            if (celula.dataset.tipo !== 'vazio') {
+                alert("Esta área já está ocupada!");
+                return;
+            }
 
             const config = dadosConstrucao[construcaoSelecionada];
 
@@ -202,7 +208,6 @@
             document.getElementById('txt-producao').innerText = `${producao} sc/ano`;
             document.getElementById('txt-sustentabilidade').innerText = `${sustentabilidade}%`;
 
-            // Alerta de Game Over ou Vitória baseado no tema do Agrinho
             if (sustentabilidade <= 20) {
                 document.getElementById('txt-sustentabilidade').style.color = 'red';
             } else {
@@ -210,16 +215,19 @@
             }
         }
 
-        // Loop de tempo do jogo (Renda baseada na produção e bônus de sustentabilidade)
+        // Loop de tempo do jogo (Ganha dinheiro a cada 2 segundos baseado na produção)
         setInterval(() => {
             if (producao > 0) {
-                // Se a sustentabilidade estiver alta, ganha bônus. Se estiver baixa, perde dinheiro com multas ecológicas.
                 let fatorSustentavel = sustentabilidade / 100;
-                let lucro = Math.floor(producao * fatorSustentavel);
+                let lucro = Math.floor(producao * 5 * fatorSustentavel); // multiplicando a produção para render mais
                 
                 moedas += lucro;
                 atualizarInterface();
             }
-        </script>
+        }, 2000);
+
+        // Executa a criação do tabuleiro assim que a página carrega
+        criarTabuleiro();
+    </script>
 </body>
 </html>
