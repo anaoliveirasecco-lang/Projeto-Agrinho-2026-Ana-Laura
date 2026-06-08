@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroSustentável: O Simulador</title>
+    <style>
+        :root {
+            --primary: #2e7d32;
+            --primary-light: #4caf50;
+            --accent: #ffb300;
+            --dark: #1b5e20;
+            --bg: #e8f5e9;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            text-align: center;
+            color: var(--dark);
+            margin-bottom: 20px;
+        }
+
+        #painel-status {
+            display: flex;
+            gap: 20px;
+            background: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .status-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .status-valor {
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+
+        #controles {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-construcao {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .btn-construcao:hover {
+            transform: scale(1.05);
+        }
+
+        #btn-lavoura { background-color: #ffd54f; color: #5d4037; }
+        #btn-reserva { background-color: #81c784; color: #1b5e20; }
+        #btn-tecnologia { background-color: #4fc3f7; color: #0d47a1; }
+
+        .selecionado {
+            outline: 3px solid black;
+        }
+
+        #tabuleiro {
+            display: grid;
+            grid-template-columns: repeat(5, 80px);
+            grid-template-rows: repeat(5, 80px);
+            gap: 5px;
+            background: #a1887f;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+
+        .celula {
+            background-color: #8d6e63;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: background 0.3s;
+        }
+
+        .celula:hover {
+            filter: brightness(1.2);
+        }
+
+        /* Estilos dos terrenos */
+        .lavoura { background-color: #fff176; }
+        .reserva { background-color: #4caf50; }
+        .tecnologia { background-color: #80deea; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Agro Forte, Futuro Sustentável</h1>
+        <p>Encontre o equilíbrio perfeito entre produção e preservação ambiental!</p>
+    </header>
+
+    <section id="painel-status">
+        <div class="status-item">
+            <span>Caixa</span>
+            <span id="txt-moedas" class="status-valor">R$ 1000</span>
+        </div>
+        <div class="status-item">
+            <span>Produção</span>
+            <span id="txt-producao" class="status-valor">0 sc/ano</span>
+        </div>
+        <div class="status-item">
+            <span>Sustentabilidade</span>
+            <span id="txt-sustentabilidade" class="status-valor">100%</span>
+        </div>
+    </section>
+
+    <section id="controles">
+        <button id="btn-lavoura" class="btn-construcao" onclick="selecionarConstrucao('lavoura')">Plantio Convencional (-R$100)</button>
+        <button id="btn-reserva" class="btn-construcao" onclick="selecionarConstrucao('reserva')">Reserva Legal (-R$150)</button>
+        <button id="btn-tecnologia" class="btn-construcao" onclick="selecionarConstrucao('tecnologia')">Agrotech (-R$300)</button>
+    </section>
+
+    <main id="tabuleiro"></main>
+
+    <script>
+        // Economia do Jogo
+        let moedas = 1000;
+        let producao = 0;
+        let sustentabilidade = 100;
+        let construcaoSelecionada = null;
+
+        // Custos e Impactos das construções
+        const dadosConstrucao = {
+            lavoura: { custo: 100, prod: 20, sust: -10, icone: '🌾' },
+            reserva: { custo: 150, prod: 0, sust: 15, icone: '🌳' },
+            tecnologia: { custo: 300, prod: 40, sust: 5, icone: '🛸' }
+        };
+
+        const tabuleiro = document.getElementById('tabuleiro');
+
+        // Inicializa o Tabuleiro 5x5
+        function criarTabuleiro() {
+            for (let i = 0; i < 25; i++) {
+                const celula = document.createElement('div');
+                celula.classList.add('celula');
+                celula.dataset.tipo = 'vazio';
+                celula.addEventListener('click', () => construir(celula));
+                tabuleiro.appendChild(celula);
+            }
+        }
+
+        // Escolhe o que construir
+        function selecionarConstrucao(tipo) {
+            construcaoSelecionada = tipo;
+            document.querySelectorAll('.btn-construcao').forEach(btn => btn.classList.remove('selecionado'));
+            document.getElementById(`btn-${tipo}`).classList.add('selecionado');
+        }
+
+        // Aplica a construção na célula
+        function construir(celula) {
+            if (!construcaoSelecionada) return alert("Selecione uma estrutura antes!");
+            if (celula.dataset.tipo !== 'vazio') return alert("Esta área já está ocupada!");
+
+            const config = dadosConstrucao[construcaoSelecionada];
+
+            if (moedas >= config.custo) {
+                moedas -= config.custo;
+                celula.classList.add(construcaoSelecionada);
+                celula.dataset.tipo = construcaoSelecionada;
+                celula.innerText = config.icone;
+                
+                // Atualiza métricas
+                producao += config.prod;
+                sustentabilidade = Math.min(100, Math.max(0, sustentabilidade + config.sust));
+
+                atualizarInterface();
+            } else {
+                alert("Dinheiro insuficiente para esta ação!");
+            }
+        }
+
+        function atualizarInterface() {
+            document.getElementById('txt-moedas').innerText = `R$ ${moedas}`;
+            document.getElementById('txt-producao').innerText = `${producao} sc/ano`;
+            document.getElementById('txt-sustentabilidade').innerText = `${sustentabilidade}%`;
+
+            // Alerta de Game Over ou Vitória baseado no tema do Agrinho
+            if (sustentabilidade <= 20) {
+                document.getElementById('txt-sustentabilidade').style.color = 'red';
+            } else {
+                document.getElementById('txt-sustentabilidade').style.color = 'var(--primary)';
+            }
+        }
+
+        // Loop de tempo do jogo (Renda baseada na produção e bônus de sustentabilidade)
+        setInterval(() => {
+            if (producao > 0) {
+                // Se a sustentabilidade estiver alta, ganha bônus. Se estiver baixa, perde dinheiro com multas ecológicas.
+                let fatorSustentavel = sustentabilidade / 100;
+                let lucro = Math.floor(producao * fatorSustentavel);
+                
+                moedas += lucro;
+                atualizarInterface();
+            }
+        </script>
+</body>
+</html>
