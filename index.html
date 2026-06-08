@@ -55,6 +55,8 @@
             margin-bottom: 20px;
             display: flex;
             gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
         .btn-construcao {
@@ -73,6 +75,21 @@
         #btn-lavoura { background-color: #ffd54f; color: #5d4037; }
         #btn-reserva { background-color: #81c784; color: #1b5e20; }
         #btn-tecnologia { background-color: #4fc3f7; color: #0d47a1; }
+
+        #btn-turno {
+            background-color: #e65100;
+            color: white;
+            font-size: 1.1rem;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        #btn-turno:hover { background-color: #f57c00; }
 
         .selecionado {
             outline: 3px solid black;
@@ -104,7 +121,6 @@
             filter: brightness(1.2);
         }
 
-        /* Estilos dos terrenos */
         .lavoura { background-color: #fff176; }
         .reserva { background-color: #4caf50; }
         .tecnologia { background-color: #80deea; }
@@ -113,8 +129,8 @@
 <body>
 
     <header>
-        <h1>Agro Forte, Futuro Sustentável</h1>
-        <p>Encontre o equilíbrio perfeito entre produção e preservação ambiental!</p>
+        <h1>AgroSustentável: O Jogo do Agrinho</h1>
+        <p>Combine produção forte com proteção ao meio ambiente!</p>
     </header>
 
     <section id="painel-status">
@@ -123,7 +139,7 @@
             <span id="txt-moedas" class="status-valor">R$ 1000</span>
         </div>
         <div class="status-item">
-            <span>Produção</span>
+            <span>Produção Total</span>
             <span id="txt-producao" class="status-valor">0 sc/ano</span>
         </div>
         <div class="status-item">
@@ -138,26 +154,26 @@
         <button id="btn-tecnologia" class="btn-construcao" onclick="selecionarConstrucao('tecnologia')">Agrotech (-R$300)</button>
     </section>
 
+    <button id="btn-turno" onclick="passarTurno()">🌾 COLHER & AVANÇAR ANO 🗓️</button>
+
     <main id="tabuleiro"></main>
 
     <script>
-        // Economia do Jogo
         let moedas = 1000;
         let producao = 0;
         let sustentabilidade = 100;
         let construcaoSelecionada = null;
 
-        // Custos e Impactos das construções
         const dadosConstrucao = {
-            lavoura: { custo: 100, prod: 20, sust: -10, icone: '🌾' },
-            reserva: { custo: 150, prod: 0, sust: 15, icone: '🌳' },
-            tecnologia: { custo: 300, prod: 40, sust: 5, icone: '🛸' }
+            lavoura: { custo: 100, prod: 30, sust: -15, icone: '🌾' },
+            reserva: { custo: 150, prod: 0, sust: 20, icone: '🌳' },
+            tecnologia: { custo: 300, prod: 60, sust: 5, icone: '🛸' }
         };
 
         const tabuleiro = document.getElementById('tabuleiro');
 
-        // Inicializa o Tabuleiro 5x5 automaticamente ao carregar
         function criarTabuleiro() {
+            tabuleiro.innerHTML = '';
             for (let i = 0; i < 25; i++) {
                 const celula = document.createElement('div');
                 celula.classList.add('celula');
@@ -167,21 +183,19 @@
             }
         }
 
-        // Escolhe o que construir
         function selecionarConstrucao(tipo) {
             construcaoSelecionada = tipo;
             document.querySelectorAll('.btn-construcao').forEach(btn => btn.classList.remove('selecionado'));
             document.getElementById(`btn-${tipo}`).classList.add('selecionado');
         }
 
-        // Aplica a construção na célula
         function construir(celula) {
             if (!construcaoSelecionada) {
-                alert("Selecione um botão de estrutura antes (Plantio, Reserva ou Agrotech)!");
+                alert("Selecione um elemento acima primeiro!");
                 return;
             }
             if (celula.dataset.tipo !== 'vazio') {
-                alert("Esta área já está ocupada!");
+                alert("Este espaço já está em uso!");
                 return;
             }
 
@@ -193,14 +207,51 @@
                 celula.dataset.tipo = construcaoSelecionada;
                 celula.innerText = config.icone;
                 
-                // Atualiza métricas
                 producao += config.prod;
                 sustentabilidade = Math.min(100, Math.max(0, sustentabilidade + config.sust));
 
                 atualizarInterface();
+                verificarFimDeJogo();
             } else {
-                alert("Dinheiro insuficiente para esta ação!");
+                alert("Você não tem dinheiro suficiente!");
             }
+        }
+
+        // Nova mecânica ativa de Turnos (Colheita)
+        function passarTurno() {
+            if (producao === 0) {
+                alert("Plante alguma coisa antes de colher!");
+                return;
+            }
+
+            // O lucro depende da sustentabilidade (Agro em equilíbrio rende mais!)
+            let multiplicadorSustentavel = sustentabilidade / 100;
+            // Garante uma renda mínima de 20% da produção para o jogador nunca travar totalmente
+            if(multiplicadorSustentavel < 0.2) multiplicadorSustentavel = 0.2; 
+
+            let lucroPrevisto = Math.floor(producao * 10 * multiplicadorSustentavel);
+            moedas += lucroPrevisto;
+
+            alert(`Ano Finalizado! Sua colheita rendeu: R$ ${lucroPrevisto}`);
+            atualizarInterface();
+            verificarFimDeJogo();
+        }
+
+        function verificarFimDeJogo() {
+            if (sustentabilidade <= 0) {
+                alert("🚨 FIM DE JOGO! A falta de sustentabilidade esgotou os recursos da região e causou multas severas. Lembre-se: no Agrinho, precisamos de equilíbrio!");
+                reiniciarJogo();
+            }
+        }
+
+        function reiniciarJogo() {
+            moedas = 1000;
+            producao = 0;
+            sustentabilidade = 100;
+            construcaoSelecionada = null;
+            document.querySelectorAll('.btn-construcao').forEach(btn => btn.classList.remove('selecionado'));
+            criarTabuleiro();
+            atualizarInterface();
         }
 
         function atualizarInterface() {
@@ -208,25 +259,13 @@
             document.getElementById('txt-producao').innerText = `${producao} sc/ano`;
             document.getElementById('txt-sustentabilidade').innerText = `${sustentabilidade}%`;
 
-            if (sustentabilidade <= 20) {
+            if (sustentabilidade <= 30) {
                 document.getElementById('txt-sustentabilidade').style.color = 'red';
             } else {
                 document.getElementById('txt-sustentabilidade').style.color = 'var(--primary)';
             }
         }
 
-        // Loop de tempo do jogo (Ganha dinheiro a cada 2 segundos baseado na produção)
-        setInterval(() => {
-            if (producao > 0) {
-                let fatorSustentavel = sustentabilidade / 100;
-                let lucro = Math.floor(producao * 5 * fatorSustentavel); // multiplicando a produção para render mais
-                
-                moedas += lucro;
-                atualizarInterface();
-            }
-        }, 2000);
-
-        // Executa a criação do tabuleiro assim que a página carrega
         criarTabuleiro();
     </script>
 </body>
